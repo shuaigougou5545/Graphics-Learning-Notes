@@ -6,7 +6,7 @@ List：
 
 - **Rendering Equation**：介绍渲染方程，并通过渲染方程，理解常见的图形学算法
 
-  - 
+  - > 🔗：https://github.com/shuaigougou5545/Graphics-Learning-Notes/blob/master/Rendering%20Equation.md
 
 - **Math in CG**：图形学底层数学的推导&总结
 

@@ -4,6 +4,7 @@
 
 using namespace std;
 
+typedef array<int, 2> vec2i;
 typedef array<float, 3> vec3;
 typedef array<float, 4> vec4;
 typedef array<array<float, 3>, 3> mat3;
@@ -28,6 +29,11 @@ void input(mat4& m)
                 cin >> m[i][j];
 }
 
+void prt(const vec2i& v)
+{
+    cout << v[0] << ' ' << v[1] << "\n" << endl;
+}
+
 void prt(const vec4& v)
 {
     cout << v[0] << ' ' << v[1] << ' ' << v[2] << ' ' << v[3] << "\n" << endl;
@@ -42,6 +48,11 @@ void prt(const mat4& m)
         cout << "\n";
     }
     cout << endl;
+}
+
+float dot(const vec3& v1, const vec3& v2)
+{
+    return v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2];
 }
 
 vec3 normalize(const vec3& v)
@@ -105,7 +116,7 @@ mat4 identityMat4()
     res[0][0] = 1;
     res[1][1] = 1;
     res[2][2] = 1;
-    res[3][3] = 1;   
+    res[3][3] = 1;
     return res;
 }
 
@@ -204,10 +215,6 @@ mat4 getModelMatrix(const vec3& scale, const vec3& rotation_axis, const float an
     mat4 S = getScaleMatrix(scale);
     mat4 R = getRotationMatrix(rotation_axis, angle);
     mat4 T = getTranslationMatrix(trans);
-    
-    prt(S);
-    prt(R);
-    prt(T);
 
     res = matrixMultiply(res, S);
     res = matrixMultiply(res, R);
@@ -216,11 +223,74 @@ mat4 getModelMatrix(const vec3& scale, const vec3& rotation_axis, const float an
     return res;
 }
 
-mat4 getViewMatrix(const vec3& right, const vec3& up, const float forward, const vec3& cameraW)
+mat4 getViewMatrix(const vec3& right, const vec3& up, const vec3& forward, const vec3& cameraW)
 {
     mat4 res = identityMat4();
+    vec3 x = normalize(right);
+    vec3 y = normalize(up);
+    vec3 z = normalize(forward);
 
-    res[0] = 
+    res[0][0] = x[0];
+    res[1][0] = x[1];
+    res[2][0] = x[2];
+    res[0][1] = y[0];
+    res[1][1] = y[1];
+    res[2][1] = y[2];
+    res[0][2] = z[0];
+    res[1][2] = z[1];
+    res[2][2] = z[2];
+    res[3][0] = -dot(cameraW, x);
+    res[3][1] = -dot(cameraW, y);
+    res[3][2] = -dot(cameraW, z);
+
+    return res;
+}
+
+mat4 getPerspectiveMatrix(float aspect_ratio, float alpha, float near, float far)
+{
+    /*
+        perspective projection matrix:
+        1/tan(𝝰/2)  0           0       0
+        0       1/(rtan(𝝰/2))   0       0
+        0           0          f/(f-n)  1
+        0           0        -nf/(f-n)  0
+    */
+    mat4 res = zeroMat4();
+    float t = tan(angleToRadius(alpha / 2.0));
+    res[0][0] = 1.0 / t;
+    res[1][1] = 1.0 / (t * aspect_ratio);
+    res[2][2] = far / (far - near);
+    res[3][2] = -near * far / (far - near);
+    res[2][3] = 1;
+
+    return res;
+}
+
+vec4 perspective_division(vec4 v)
+{
+    vec4 res;
+    if(abs(v[3]) < 0.0001f)
+        v[3] = (v[3] >= 0.0) * 0.0001f;
+    res[0] = v[0] / v[3];
+    res[1] = v[1] / v[3];
+    res[2] = v[2] / v[3];
+    res[3] = v[3] / v[3];
+    return res;
+}
+
+vec2i mappingToScreen(int width, int height, const vec4& posNDC)
+{
+    vec2i uv;
+    uv[0] = uv[1] = 0;
+
+    float x = posNDC[0] * 0.5 + 0.5;
+    float y = posNDC[1] * 0.5 + 0.5;
+    y = 1.0 - y;
+
+    uv[0] = x * width;
+    uv[1] = y * height;
+
+    return uv;
 }
 
 int main()
@@ -251,9 +321,34 @@ int main()
     input(right);
     input(up);
     input(forward);
+    view = getViewMatrix(right, up, forward, cameraW);
     
+    vec4 posV;
+    posV = transform(posW, view);
+    
+    // projection
+    mat4 projection;
+    float aspect_ratio, alpha, near, far;
+    cin >> aspect_ratio >> alpha >> near >> far;
+    projection = getPerspectiveMatrix(aspect_ratio, alpha, near, far);
 
+    vec4 posH;
+    posH = transform(posV, projection);
     
+    // ndc
+    vec4 posN;
+    posN = perspective_division(posH);
+    if(posN[0] < -1.0 || posN[0] > 1.0 || posN[1] < -1.0 || posN[1] > 1.0 || posN[2] < 0.0 || posN[2] > 1.0)
+    {
+        cout << "像素不在视锥体范围内！" << endl;
+        return 0;
+    }
+    
+    // screen
+    int width, height;
+    cin >> width >> height;
+    auto uv = mappingToScreen(width, height, posN);
+    cout << uv[0] << ' ' << uv[1] << "\n" << endl;
 
     return 0;
 }

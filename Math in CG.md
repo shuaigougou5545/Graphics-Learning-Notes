@@ -674,49 +674,50 @@ $$
     - 上面右图可以发现，我们可以将垂直向量的旋转问题，看成一个(原向量的模,0)向量在以下xoy平面旋转：
 
     - $$
-      x轴:\vec{v_\bot} \\ y轴:\vec{n}\times \vec{v} \ 或 \ \vec{n} \times \vec{v_\bot}
+      x轴:\vec{v_\bot} 
+      \\ {\color{red} y轴:\vec{n}\times \vec{v} \ 或 \ \vec{n} \times \vec{v_\bot} }
       $$
-
+      
     - 那么旋转后的向量对x轴和y轴的投影之和就是旋转向量：
-
+    
     - $$
       \vec{v_\bot}'=||\vec{v}_\bot||\cdot cos\theta\cdot \frac{\vec{v_\bot}}{||\vec{v}_\bot||}+||\vec{v}_\bot||\cdot sin\theta\cdot \frac{\vec{n}\times \vec{v}}{||\vec{n}\times\vec{v}||}
-      \\ \because |\vec{n}\times \vec{v}|=|\vec{v_\bot}|
+      \\ {\color{red} \because |\vec{n}\times \vec{v}|=|\vec{v_\bot}|}
       \\ =\vec{v_\bot}\cdot cos\theta + (\vec{n} \times \vec{v})\cdot sin\theta
       $$
-
+    
     - 所以整合公式：
-
+    
     - $$
       \vec{v}'=\vec{v_\parallel}+\vec{v_\bot}'
       \\ =\vec{v_\parallel}+ \vec{v_\bot} \cdot cos\theta+(\vec{n}\times \vec{v})\cdot sin\theta
       \\ =(\vec{n}\cdot \vec{v})\cdot \vec{n}+(\vec{v}-(\vec{n}\cdot \vec{v})\cdot\vec{n})\cdot cos\theta+(\vec{n}\times \vec{v})\cdot sin\theta
       \\ =(1-cos\theta)\cdot(\vec{n}\cdot \vec{v})\cdot \vec{n}+cos\theta\cdot\vec{v}+(\vec{n}\times \vec{v})\cdot sin\theta
       $$
-
+    
     - 结果：
-
+    
     - $$
       {\color{Red} R_n(v)=proj_n(v)+R_n(v_\bot)}
       \\ {\color{Red} =cos\theta \textbf{v}+(1-cos\theta)(\textbf{n}\cdot \textbf{v})\textbf{n}+sin\theta(\textbf{n}\times \textbf{v})}
       $$
-
+    
     - 证明此变换是线性变换：
-
+    
       - 性质1：
-
+    
         - 叉积满足分配率：
           $$
           n\times (v_1+v_2)=n\times v_1+n\times v_2
           $$
-
+    
         - 点积满足分配率：
           $$
           n\cdot(v_1+v_2)=n\cdot v_1 + n\cdot v_2
           $$
-
+    
       - 性质2：易证，不管点积叉积，都可以将常数提取出来
-
+    
     - 当知道变换是线性变换后，我们可以构造矩阵 -- 对标准基向量变换以快速构造：
       $$
       n=(x,y,z) \ \ \ \ \theta

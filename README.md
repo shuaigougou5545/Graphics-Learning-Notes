@@ -12,6 +12,10 @@ List：
 
   - > 🔗：https://github.com/shuaigougou5545/Graphics-Learning-Notes/blob/master/Math%20in%20CG.md
 
+- **Position Transform**：手撸顶点位置从局部空间最终变换到屏幕像素的过程
+
+  - > 🔗：
+  
 - ~~**Post Processing**（后处理）： “Next Generation Post Processing in Call of Duty：Advanced Warefare” 【in SIGGRAPH 2014 Advances in Real-Time Rendering in Games】~~
 
   - > 🔗：https://github.com/shuaigougou5545/Graphics-Learning-Notes/blob/master/Post%20Processing.md

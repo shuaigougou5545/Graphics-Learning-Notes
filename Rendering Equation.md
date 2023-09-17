@@ -176,8 +176,7 @@ $$
 L_o(p,\omega_o)=L_e(p,\omega_o)+\sum L_i(p,\omega_i)f_r(p, w_i\rightarrow w_r)cos\theta_i d\omega_i
 $$
 
-
-**面光源**：积分面光源对应的立体角
+**面光源**：积分面光源对应的立体角「TODO：LTC面光源渲染」
 $$
 L_o(p,\omega_o)=L_e(p,\omega_o)+\int L_i(p,\omega_i)f_r(p, w_i\rightarrow w_r)cos\theta_i d\omega_i
 $$
@@ -333,11 +332,11 @@ PRT知识体系：
 
 『
 
-什么是正交：正交是垂直的拓展概念，正交就是内积为0
+什么是正交：正交是垂直的拓展概念，正交就是内积为0；我们如何定义函数是否正交，引入正交函数（集），也就是乘积和积分的形式，也就是Product Integral【Product Integral本质是一个点乘】
 
 > 维基百科：https://zh.wikipedia.org/wiki/%E6%AD%A3%E4%BA%A4
 
-**正交函数集**：对于两个函数f和g，可以定义如下的内积：
+**正交函数（集）**：对于两个函数f和g，可以定义如下的内积：
 $$
 <f,g>_w=\int_a^bf(x)g(x)w(x)dx
 $$
@@ -383,7 +382,48 @@ $$
 $$
 f(x)=\sum_i c_i \cdot B_i(x)
 $$
-球谐函数（Spherical Harmonics）：球谐函数是一系列二维的基函数，定义在球面上的 => 二维：球面坐标系的θ、φ（俯仰角和方位角）
+**球谐函数**（Spherical Harmonics）：球谐函数是一系列二维的基函数，定义在球面上的 => 二维：球面坐标系的θ、φ（俯仰角和方位角）
+
+```cpp
+球谐函数具体怎么写出来要使用勒让德多项式，在课程中更关注球谐应用层面
+```
+
+每一行的函数族具有相同的频率；第l行有2l+1个函数，分别标号为-l～l；前n阶有个(n+1)^2函数
+
+<img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309151639694.png" alt="截屏2023-09-15 16.39.48" style="zoom:50%;" />
+
+最重要的性质：B<sub>i</sub>是第i个球谐基函数，c<sub>i</sub>是其对应的系数，我们能通过对f(x)与某个球谐基函数进行<u>product integral</u>，得到对应的系数 => 这种操作我们叫做<font color='red'>**投影**</font>，<u>将f(x)投影到某个基函数上</u> 
+$$
+{\color{green} c_i=\int_{\Omega}f(\omega)B_i(\omega)d\omega}
+$$
+依次计算每阶的系数，我们可以恢复出原函数
+
+```cpp
+对于diffuse brdf来说,前三阶球谐已经能大致描述brdf(diffuse);
+那么既然只拿前3阶描述brdf,那也就只需要用前3阶来描述光照
+```
+
+Games202 Lecture6 - 1:10:00
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

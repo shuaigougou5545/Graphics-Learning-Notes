@@ -266,6 +266,27 @@ mat4 getPerspectiveMatrix(float aspect_ratio, float alpha, float near, float far
     return res;
 }
 
+mat4 getOrthogonalMatrix(float l, float r, float t, float b, float n, float f)
+{
+    /*
+        orthogonal projection matrix:
+        2/(r-l)         0               0               0
+        0               2/(t-b)         0               0
+        0               0               2/(f-n)         0
+        -(r+l)/(r-l)    -(t+b)/(t-b)    -(f+n)/(f-n)    1
+    */
+    mat4 res = zeroMat4();
+    res[0][0] = 2/(r-l);
+    res[1][1] = 2/(t-b);
+    res[2][2] = 2/(f-n);
+    res[3][0] = -(r+l)/(r-l);
+    res[3][1] = -(t+b)/(t-b);
+    res[3][2] = -(f+n)/(f-n);
+    res[3][3] = 1;
+    
+    return res;
+}
+
 vec4 perspective_division(vec4 v)
 {
     vec4 res;

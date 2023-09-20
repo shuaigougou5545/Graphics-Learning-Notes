@@ -213,6 +213,14 @@ $$
 - case 1：f/g函数的积分域足够小（support很小）
 - case 2：f/g函数足够光滑（也就是近似于常数，波动不大）
 
+#### （1）积分/求和顺序
+
+$$
+\int...\sum ...\approx \sum...\int ...
+$$
+
+图形学中一般认为积分和求和是可以互相更换顺序的，一般认为是相等的便于推导公式
+
 ### 4.shadow
 
 「利用渲染方程来理解shadow的原理」：shadow_map中我们直接将V项提取出来：
@@ -274,7 +282,7 @@ D(h)=\frac{e^{-\frac{tan^2\theta_h}{\alpha ^2}}}{\pi \alpha^2cos^4\theta_h}
 $$
 暂时不考虑G项，我们发现brdf可以抽成三个变量：α、θ<sub>v</sub>、R<sub>0</sub>，三维度的预计算还是太高了，继续降维度 => 通过以下方式，将R<sub>0</sub>拆到积分外面：
 
-「这里的θ<sub>v</sub>是出射方向或者是观察方向于法线的夹角，而不是入射光线，所以这里的θ<sub>v</sub>和积分结尾θ<sub>i</sub>是不同的，在积分过程中θ<sub>i</sub>是不断变化的值」
+「这里的<font color='red'>**θ<sub>v</sub>是出射方向**</font>或者是观察方向于法线的夹角，而不是入射光线，所以这里的θ<sub>v</sub>和积分结尾θ<sub>i</sub>是不同的，在积分过程中θ<sub>i</sub>是不断变化的值」
 
 「写成分数形式其实不太直观：其实就是将F项从fr拆出来，那么fr/F就是剩下的D、G等项」
 $$
@@ -388,6 +396,8 @@ $$
 球谐函数具体怎么写出来要使用勒让德多项式，在课程中更关注球谐应用层面
 ```
 
+> 拓展阅读：球谐函数基础一 - 和合的文章 - 知乎 https://zhuanlan.zhihu.com/p/467466131 - 解释球谐函数具体是什么，球谐的函数实际上很简单
+
 每一行的函数族具有相同的频率；第l行有2l+1个函数，分别标号为-l～l；前n阶有个(n+1)^2函数
 
 <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309151639694.png" alt="截屏2023-09-15 16.39.48" style="zoom:50%;" />
@@ -403,27 +413,97 @@ $$
 那么既然只拿前3阶描述brdf,那也就只需要用前3阶来描述光照
 ```
 
-Games202 Lecture6 - 1:10:00
+回到渲染方程：
+$$
+L(o)=\int_\Omega L(i)V(i)\rho(i, o)max(0,n\cdot i)di
+$$
 
+```cpp
+目前是三个函数相乘的积分,假设要实时计算积分,工作量很大:
+根据当前的wo,分别去采样三个函数在不同入射方向的值然后积分起来
+```
 
+PRT的“解题思路”：
 
+<img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309191135851.png" alt="截屏2023-09-19 11.35.24" style="zoom:40%;" />
 
+将渲染方程中L项与其他项拆开，分为lighting和light transport项，light transport项可以认为是顶点的固有属性，是我们可以预计算出来的 => 这种方式**只能处理静态场景**（因为Visibility项是预计算而固定）
 
+**Diffuse Case**：brdf为常值
 
+- $$
+  L(o)=\rho\int_\Omega L(i)V(i)max(0,n\cdot i)di
+  \\ L(i)=\sum l_iB_i(i)
+  \\ L(o)\approx \rho\int_\Omega \sum l_iB_i(i)V(i)max(0,n\cdot i)di
+  \\L(o)\approx \rho\sum l_i\int_\Omega B_i(i)V(i)max(0,n\cdot i)di
+  \\ 观察右侧积分的形式,相当于将light\ \ transport投影到基函数上
+  \\ L(o)\approx \rho \sum l_iT_i
+  $$
 
+- 所以我们需要分别计算light和light transport投影到球谐函数上的各系数，我们将各系数根据对应阶数相乘就得到了我们的结果（点乘）
 
+- 🤔️有一种更简单的思考方式：我们直接将light和light transport项投影到对应基函数上，再利用球谐函数的正交性得到是对应系数的点积
 
+  - $$
+    L(o)=\rho\int_\Omega L(i)V(i)max(0,n\cdot i)di
+    \\ L(o)=\rho \int_\Omega (\sum l_iB_i) \cdot(\sum T_iB_i)di
+    \\ L(o)=\rho \int_\Omega (l_0B_0+l_1B_1+...+l_nB_n) \cdot(T_0B_0+T_1B_1+...+T_nB_n)di
+    \\ L(o)=\rho\int_\Omega(l_0B_0\cdot T_0B_0)+\rho\int_\Omega(l_1B_1\cdot T_1B_1)+... \ \ \ \ 【系数相同,积分为1】
+    \\ +\rho\int_\Omega(l_0B_0\cdot T_1B_1)+...【系数不相同,积分为0】
+    \\ = \sum l_iT_i
+    $$
 
+球谐函数的优秀性质：
 
+- **正交性**
 
+  - 球谐函数的基函数投影到自己积分为1，投影到其他基函数积分为0 => 正交性
+    $$
+    \int_\Omega B_i(i)\cdot B_j(i)di=1 \ \ \ \ (i=j)
+    \\ \int_\Omega B_i(i)\cdot B_j(i)di=0 \ \ \ \ (i\neq j)
+    $$
 
+- 投影和重建操作很简单
 
+- 支持简单的旋转：比如我们旋转光源，那么旋转后光源对应的基函数系数有一个特殊的规律，就是系数是同阶基函数的线性组合
 
+具体的预计算过程：
 
+- 预计算
+  - light：投影到每个基函数上，投影/积分计算中，对球面进行采样，采样方向得到L，再乘以基函数在该方向上的值，求和
+  - light transport：我们是<font color='red'>**逐顶点**</font>进行计算，投影到每个基函数上，投影/积分计算中，对球面进行处采样，采样方向得到Visibility项，以及cosθi，再乘以基函数在该方向上的值，求和
+  - 预计算的结果：假如说我们用前3阶球谐函数来模拟，那么light就是4×3个系数，（×3是因为光是rgb），那么light transport就是4×3×顶点数目
+- shader中还原：light transport我们作为顶点属性数组传入，light作为uniform传入，在shader中进行对应相乘，得到数据
 
+其他问题：
 
+- 给一个cubemap,每一个像素对应的立体角是多大,或者叫投影到单位球面的面积是多大？ 
 
+- > https://www.cnblogs.com/redips-l/p/10976173.html
 
+```
+games202-作业2-遇到的问题:
+1.给一个cubemap,每一个像素对应的立体角是多大,或者叫投影到单位球面的面积是多大？ 
+2.低阶球谐旋转
+3.如何处理间接光照
+```
+
+**Glossy Case**：
+
+- $$
+  L(o)=\int_\Omega L(i)V(i)\rho(i,o)max(0,n\cdot i)di
+  \\ L(o)\approx \sum l_iT_i(o)
+  \\ T_i(o)\approx \sum t_{ij}B_j(o)
+  \\ \therefore L(o)\approx \sum(\sum l_it_{ij})B_j(o)
+  $$
+
+- <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309191544292.png" alt="截屏2023-09-19 15.44.18" style="zoom:50%;" />
+- brdf此时不再是常数，因为出射方向wo可以任意指定，所以此时每个顶点的Light Transport不再是固定的，而是关于o的函数
+
+球谐后续：
+
+- 人们会使用前3、4、5阶球谐来模拟
+- 球谐不太适合描述
 
 
 
@@ -465,3 +545,15 @@ $$
 <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202307311743333.png" alt="截屏2023-07-31 17.41.06" style="zoom:50%;" />
 
 分析：该微分面积可以看成一个长方形，分别是θ和φ的方向；因为弧长=半径*角度，所以θ方向的长度为rdθ；而φ方向要注意，它投影到底面一定长度小于半径r，所以我们需要找到它的对应半径，其实我们作辅助线，在上面构造一个和底面平行的圆，这个圆的半径是rsinθ，故得证
+
+-----
+
+## 🎨相关属性查表！
+
+### 1.球谐函数
+
+<img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309191222956.webp" alt="球谐函数" style="zoom:67%;" />
+
+#### 2.菲涅尔系数 - F<sub>0</sub>
+
+<img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309191223865.JPG" alt="IMG_5458" style="zoom:70%;" />

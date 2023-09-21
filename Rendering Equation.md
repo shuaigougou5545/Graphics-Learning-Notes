@@ -362,6 +362,9 @@ $$
 
 - > 参考：（全网独家发布）傅里叶级数（一）——正交性与完备性（全网首篇证明完备性）的证明、傅里叶变换的直观解释以及相关结论在广义积分甚至勒贝积分下的若干深入补充讨论 - 数学达人上官正申的文章 - 知乎 https://zhuanlan.zhihu.com/p/472769406
 
+- 涉及到一个积化和差（或者和差化积）的公式：
+- <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309210957942.png" alt="截屏2023-09-21 09.56.52" style="zoom:50%;" />
+
 』
 
 低频信息：变化不剧烈的信息；图片的低频信息：就是拿一个线去“扫描”图像，图像信息波动不大，波动平缓，那就是低频信息
@@ -398,8 +401,12 @@ $$
 
 > 拓展阅读：球谐函数基础一 - 和合的文章 - 知乎 https://zhuanlan.zhihu.com/p/467466131 - 解释球谐函数具体是什么，球谐的函数实际上很简单
 
-每一行的函数族具有相同的频率；第l行有2l+1个函数，分别标号为-l～l；前n阶有个(n+1)^2函数
+每一行的函数族具有相同的频率；第l行有2l+1个函数，分别标号为-l～l；前n阶有个(n+1)^2函数；
 
+问第l阶第m个函数的在整个球谐数组的下标是多少：我们可以根据m=0时，下标为l*(l+1)，再用m做偏移，所以下标为：
+$$
+index_{(l,m)}=l\times(l+1)+m
+$$
 <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309151639694.png" alt="截屏2023-09-15 16.39.48" style="zoom:50%;" />
 
 最重要的性质：B<sub>i</sub>是第i个球谐基函数，c<sub>i</sub>是其对应的系数，我们能通过对f(x)与某个球谐基函数进行<u>product integral</u>，得到对应的系数 => 这种操作我们叫做<font color='red'>**投影**</font>，<u>将f(x)投影到某个基函数上</u> 
@@ -477,16 +484,155 @@ PRT的“解题思路”：
 
 其他问题：
 
-- 给一个cubemap,每一个像素对应的立体角是多大,或者叫投影到单位球面的面积是多大？ 
+- 问题1：给一个cubemap,每一个像素对应的立体角是多大,或者叫投影到单位球面的面积是多大？ 
 
-- > https://www.cnblogs.com/redips-l/p/10976173.html
+  - > 参考文章：https://www.cnblogs.com/redips-l/p/10976173.html
 
-```
-games202-作业2-遇到的问题:
-1.给一个cubemap,每一个像素对应的立体角是多大,或者叫投影到单位球面的面积是多大？ 
-2.低阶球谐旋转
-3.如何处理间接光照
-```
+  - <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309202220836.png" alt="1144853-20190604204419296-752302036" style="zoom:50%;" />
+
+  - 假设我们的cubemap的一个面在z=1上，对于投影面积我们通过三步求得：
+
+    - 计算cubemap上点P(x,y,1)投影到球面上的坐标P'
+    - 对于P'分别求关于x和y的偏导数，偏导数的叉乘的模长就是**微表面的面积**（**叉乘的模长**的几何意义：向量围成的平行四边形面积）
+    - 我们在x和y方向上对微表面的面积积分，得到我们所要的面积
+
+  - $$
+    投影到球面上(球放在原点)=该向量除以它的模，或者说求它的单位向量
+    \\ p=\frac{(x,y,1)}{\sqrt{x^2+y^2+1}}
+    \\ \frac{\partial p}{\partial x}=\frac{(y^2+1,-xy,-x)}{(x^2+y^2+1)^\frac{3}{2}}
+    \\ \frac{\partial p}{\partial y}=\frac{(-xy,x^2+1,-y)}{(x^2+y^2+1)^\frac{3}{2}}
+    \\ dS= || \frac{\partial p}{\partial x} \times \frac{\partial p}{\partial y}||=||\frac{(x,y,1)}{(x^2+y^2+1)^2}||=\frac{1}{(x^2+y^2+1)^\frac{3}{2}}
+    \\ 在x，y上求积分，为了方便，我们可以求从\int_{y=0}^t\int_{x=0}^s的积分f(s,t)
+    \\ f(s,t)=\int_{y=0}^t\int_{x=0}^s\frac{1}{(x^2+y^2+1)^\frac{3}{2}}dxdy \\ =tan^{-1}\frac{st}{\sqrt{s^2+t^2+1}}
+    \\ 那么对于四边形ABCD，对应的球面投影面积:S=f(A)-f(B)-f(D)+f(C)
+    \\ 再根据立体角定义:d\omega=\frac{dA}{r^2}
+    $$
+
+  - 那么这是对于cubemap求立体角，但是对于顶点求立体角，就很简单了，因为我们会随机发射光线，所以我们认为我们是均匀的采样，那每个的立体角就是：
+
+  - $$
+    d\omega=\frac{A}{r^2}
+    \\ =\frac{4\pi r^2}{r^2} = 4\pi 【对于球来说】
+    $$
+
+- 问题2：如何推导&处理球谐的旋转？
+
+  - 球谐具有的性质：
+
+    - 旋转不变性：
+      $$
+      对原函数f(x)进行R旋转:R(f(x))=f(R(x))
+      $$
+
+    - 对每层band上的SH coefficient，可以分别在上面进行旋转，并且这个旋转是线性变换：
+      $$
+      意味着如果给定某一层上SH系数列表t=(t_{0},t_{1},...,,t_{k-1})
+      \\ 如果将某个旋转R应用在其上，存在k阶方阵M_{R}使得：
+      \\ tM_R=t'
+      $$
+
+  - 快速球谐旋转是通过性质2👆推导的：
+
+    我们假设P是指某层band上投影的球谐系数列表t（P里面的自变量是x，其实是w<sub>i</sub>，Games202作业描述上写的是n<sub>i</sub>，这三者是等价的）：
+    $$
+    P(x)=[t_{-l},...,t_{l}]
+    \\ 存在旋转矩阵M使得:【性质2】
+    \\ P(x)M=P(R(x))
+    $$
+    整理得到：
+    $$
+    [P_{-l},...,t_{l}] M=P(R(x))
+    \\ 记A=[t_{-l},...,t_{l}],如果矩阵A是可逆矩阵,此时易得:
+    \\【这里的A目前是一个行向量,我们要采样填充2l+1行,将其转换为一个矩阵】
+    \\ M=A^{-1}P(R(x))
+    $$
+    ⚠️这里注意：这里A是一个行/列矩阵，它不是方阵，所以严格意义来说它没有逆矩阵（就算是方阵也可能没有逆矩阵），P(R(x))同理 => <font color='red'>**所以我们需要填充，将其构造成一个矩阵**</font>
+
+    对于第l层的band，构造矩阵的方式是，目前有1行2l+1列，所以我们需要取2l+1行/组数据传入进去，每一组数据都是**随机选择的w_i** 
+
+    => 选取的条件：（1）我们要保证选取的w_i能让A为可逆矩阵（2）可以选取一些恰当的例子让A包含更多的0，从而减少运算量
+
+    任何一个矩阵它都不一定有逆矩阵 => 所以这个旋转叫做“Simple and Fast Spherical Harmonics Rotation”，因为这比较快速，但不太准确的做法
+
+    🤔️：所以games202的推导是正确的，它这里M[P(n<sub>-l</sub>), ..., P(n<sub>l</sub>)] = [P(R(n<sub>-l</sub>)), ..., P(R(n<sub>-l</sub>))]已经进行了2l+1个采样，但是它没有类似👆的推导过程，容易让人看的一头雾水：
+
+    <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309211705355.png" alt="截屏2023-09-21 17.05.46" style="zoom: 33%;" />
+
+    **具体预计算步骤**：
+
+    - 构造A，并计算A的逆矩阵
+    - 计算P(R(n<sub>i</sub>)) i∈[-l, l]，对于任意的R，都要重新计算投影，这里与预计算不是背道而驰吗？=> 但实际上就是这么做的，原因之一是：因为只需要旋转光照，三阶球谐×rgb也就9×3个系数；原因之二如下👇
+      - 我们分析一下为什么要这么做，是否是多次一举：（1）如果我们直接将旋转后的光函数进行投影，那么对于每个球谐基函数来说，投影要采样点吧，起码>100个采样点吧，那么这个计算量相当大（2）但是我们观察我们的做法，我们只选择了2l+1个wi方向，进行投影，那么这个计算量绝对是可以接受的，可以进行实时计算
+
+- 问题3：如何计算间接光照？
+
+  - 
+
+
+##### Games202 - homework2：
+
+- ```cpp
+  PS：因为写的.cpp，所以写好记得重新编译，不然没有结果
+  ```
+
+- light.txt：
+
+  - 前三阶球谐，所以有九个系数，下面每行对应“一个”系数；但这里其实不是“一个”系数，而是三个系数，因为L有rgb值，需要分别投影
+  - <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309211153890.png" alt="截屏2023-09-21 11.52.33" style="zoom:50%;" />
+
+- light transport.txt：
+
+  - 如果有n个顶点，那么数据就有n行，每行是球谐系数列表，比如我们是前3阶，那么是9个数，这里一个顶点不像L有rgb值，顶点只会对应一个值
+  - <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309211153480.png" alt="截屏2023-09-21 11.52.42" style="zoom:40%;" />
+
+- reconstruction：
+
+  - ```cpp
+    // ps:这不是在vertex shader中!!!
+    // 我们计算三角形🔺012上某点的着色情况
+    auto sh0 = m_TransportSHCoeffs[0]; // 顶点0的球谐列表
+    auto sh1 = m_TransportSHCoeffs[1]; // 顶点1的球谐列表
+    auto sh2 = m_TransportSHCoeffs[1]; // 顶点2的球谐列表
+    
+    // 顶点和光照对应分量
+    Color3f c0 = Color3f(rL.dot(sh0), gL.dot(sh0), bL.dot(sh0)), // 顶点0的光照
+            c1 = Color3f(rL.dot(sh1), gL.dot(sh1), bL.dot(sh1)), // 顶点1的光照
+            c2 = Color3f(rL.dot(sh2), gL.dot(sh2), bL.dot(sh2)); // 顶点2的光照
+    
+    const Vector3f &bary = its.bary; // 插值系数/三角形重心坐标
+    Color3f c = bary.x() * c0 + bary.y() * c1 + bary.z() * c2;
+    
+    return c;
+    ```
+
+  - shader中：假如我们使用三阶球谐，就是9个系数，我们**可以通过mat3来存储这九个数**
+
+  - ```cpp
+    attribute mat3 aPrecomputeLT; // Light Transport(顶点属性)
+    uniform mat3 uPrecomputeL[3]; // Light(uniform)
+    
+    float L_dot_LT(mat3 PrecomputeL, mat3 PrecomputeLT)
+    {
+    		// 将mat3拆回成3个vec3
+      	vec3 L_0 = PrecomputeL[0];
+        vec3 L_1 = PrecomputeL[1];
+        vec3 L_2 = PrecomputeL[2];
+        vec3 LT_0 = PrecomputeLT[0];
+        vec3 LT_1 = PrecomputeLT[1];
+        vec3 LT_2 = PrecomputeLT[2];
+        return dot(L_0, LT_0) + dot(L_1, LT_1) + dot(L_2, LT_2);
+    }
+    
+    void main()
+    {
+      	for(int i = 0; i < 3; i++)
+        {
+          	vColor[i] = L_dot_LT(aPrecomputeL[i], aPrecomputeLT);
+    		}
+      	...
+    }
+    ```
+
 
 **Glossy Case**：
 
@@ -499,11 +645,12 @@ games202-作业2-遇到的问题:
 
 - <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309191544292.png" alt="截屏2023-09-19 15.44.18" style="zoom:50%;" />
 - brdf此时不再是常数，因为出射方向wo可以任意指定，所以此时每个顶点的Light Transport不再是固定的，而是关于o的函数
+- 🤔️：原先light transport是关于wi的函数，所以我们投影一次就能得到结果；但glossy case引入了brdf，让light transport是关于wi和wo的函数，那么我们先关于wi进行球谐投影，再关于wo进行球谐投影 => 投影一次能消除一个方向
 
 球谐后续：
 
 - 人们会使用前3、4、5阶球谐来模拟
-- 球谐不太适合描述
+- 球谐不太适合描述高频信息，可以使用更好的基函数进行模拟
 
 
 

@@ -1025,7 +1025,7 @@ $$
 $$
 \textbf{q}=(u,w)=(q_1,q_2,q_3,q_4)=q_1i+q_2j+q_3k+q_4
 \\ \overline{\textbf{q}}=(-u,w)=(-q_1,-q_2,-q_3,q_4)=-q_1i-q_2j-q_3k+q_4
-\\ {\color{Red} 人为定义:i^2=j^2=k^2=1,ijk=-1}
+\\ {\color{Red} 人为定义:i^2=j^2=k^2=-1,ijk=-1}
 \\ \therefore ij=k,\ ji=-k,\ jk=i,\ kj=-i,\ ki=j,\ ik=-j
 $$
 
@@ -1319,12 +1319,6 @@ $$
   ##### 总结：
   
   ##### <font color='purple'>已知向量v（`v=(v,0)`），绕n轴（n轴是单位向量）旋转θ角度，对应的旋转四元数q（`q=(nsinθ, cosθ)`），那么旋转后的新向量v'（`v'=qvq*`：四元数连乘）</font>
-  
-  
-  
-- 
-
-
 
 ### 6.解析几何 
 

@@ -566,7 +566,46 @@ PRT的“解题思路”：
 
 - 问题3：如何计算间接光照？
 
-  - 
+  - 光线传输方程变为：
+    $$
+    L_{DI}=L_{DS}+\frac{\rho}{\pi}\int_S \hat{L}(x',\omega_i)(1-V(\omega_i))max(N_x\cdot \omega_i,0)d\omega_i
+    \\ L=\frac{\rho}{\pi}\int_S(L(\omega_i)V(\omega_i) + \hat{L}(x',\omega_i)(1-V(\omega_i))max(N_x\cdot \omega_i,0)d\omega_i
+    $$
+    L<sub>DS</sub>（diffuse shadowed）是直接光源，后面的积分是计算间接光源，间接光源是指，光源首先打到某物体，再从某物体反射打到当前着色点，所以这里Visibility项取反（1-visibility）是因为光源不会直接打到着色点，也就是说我们考虑的情况正好是该方向有遮挡物的情况
+
+    具体步骤：
+
+    - 对于每个顶点，计算L<sub>DS</sub>
+    - 从当前顶点发射光线，如果与其他三角形相交，在交点处通过重心坐标插值得到球谐系数，这个系数表示间接光照的球谐系数
+    - 对于这个反射回来的间接光L(x', ω)，乘以几何项N<sub>x</sub>·ω<sub>i</sub>
+    - 计算L<sub>DS</sub>
+
+- 问题4：为什么games202方程中要除以𝜋？
+
+  -  <img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202309221141831.png" alt="截屏2023-09-22 11.37.50" style="zoom:50%;" />
+
+  - 简言之就是因为这个积分：
+
+  - $$
+    \int_\Omega cos\theta d\omega = \int_0^{2\pi}\int_0^{\pi}cos\theta(sin\theta d\theta d\Phi)=\pi
+    $$
+
+  - 具体推导：这里的ρ表示的其实是albedo，也就是说diffuse物体的brdf：
+    $$
+    diffuse物体: f_r=\frac{albedo}{\pi}
+    $$
+    首先我们要明白albedo的物理定义：也就是辐射度与辐照度之比
+    $$
+    albedo = \frac{\sum L_o}{\sum L_i}
+    $$
+    我们回到渲染方程，对于diffuse物体来说：
+    $$
+    L_o(p,\omega_o)=\int f_r\cdot L_i(p,\omega_i)\cdot cos\theta d\omega
+    \\ =(albedo\cdot L)\frac{\int cos\theta d\omega}{k}【假设k为归一化系数】
+    \\ albedo\cdot L已经等于L_o了，所以k=\int cos\theta d\omega
+    $$
+
+- > 参考文章：https://zhuanlan.zhihu.com/p/342807202
 
 
 ##### Games202 - homework2：
@@ -651,8 +690,6 @@ PRT的“解题思路”：
 
 - 人们会使用前3、4、5阶球谐来模拟
 - 球谐不太适合描述高频信息，可以使用更好的基函数进行模拟
-
-
 
 ----
 

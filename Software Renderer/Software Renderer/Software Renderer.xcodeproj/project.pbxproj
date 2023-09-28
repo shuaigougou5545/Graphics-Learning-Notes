@@ -9,7 +9,8 @@
 /* Begin PBXBuildFile section */
 		94112D122ABEE8EC008750E2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94112D112ABEE8EC008750E2 /* main.cpp */; };
 		94112D1A2ABEEBB0008750E2 /* tgaimage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94112D192ABEEBB0008750E2 /* tgaimage.cpp */; };
-		94112D1E2ABEF0F9008750E2 /* model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94112D1C2ABEF0F9008750E2 /* model.cpp */; };
+		9475AFEE2AC591BD00ED0223 /* vec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9475AFED2AC591BD00ED0223 /* vec.cpp */; };
+		9475AFF52AC5A2F200ED0223 /* model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9475AFF42AC5A2F200ED0223 /* model.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,10 +30,11 @@
 		94112D112ABEE8EC008750E2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		94112D182ABEEBB0008750E2 /* tgaimage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tgaimage.h; sourceTree = "<group>"; };
 		94112D192ABEEBB0008750E2 /* tgaimage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tgaimage.cpp; sourceTree = "<group>"; };
-		94112D1B2ABEF0F9008750E2 /* geometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
-		94112D1C2ABEF0F9008750E2 /* model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = model.cpp; sourceTree = "<group>"; };
-		94112D1D2ABEF0F9008750E2 /* model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = model.h; sourceTree = "<group>"; };
 		94112D222ABEF465008750E2 /* african_head.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = african_head.obj; sourceTree = "<group>"; };
+		9475AFE82AC527E900ED0223 /* vec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vec.h; sourceTree = "<group>"; };
+		9475AFED2AC591BD00ED0223 /* vec.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = vec.cpp; sourceTree = "<group>"; };
+		9475AFF32AC5A2F200ED0223 /* model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = model.h; sourceTree = "<group>"; };
+		9475AFF42AC5A2F200ED0223 /* model.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = model.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,11 +68,8 @@
 		94112D102ABEE8EC008750E2 /* Software Renderer */ = {
 			isa = PBXGroup;
 			children = (
-				94112D1B2ABEF0F9008750E2 /* geometry.h */,
-				94112D1C2ABEF0F9008750E2 /* model.cpp */,
-				94112D1D2ABEF0F9008750E2 /* model.h */,
-				94112D192ABEEBB0008750E2 /* tgaimage.cpp */,
-				94112D182ABEEBB0008750E2 /* tgaimage.h */,
+				9475AFEF2AC5A27700ED0223 /* Library */,
+				9475AFEC2AC52E1F00ED0223 /* Reference */,
 				94112D112ABEE8EC008750E2 /* main.cpp */,
 			);
 			path = "Software Renderer";
@@ -82,6 +81,26 @@
 				94112D222ABEF465008750E2 /* african_head.obj */,
 			);
 			path = obj;
+			sourceTree = "<group>";
+		};
+		9475AFEC2AC52E1F00ED0223 /* Reference */ = {
+			isa = PBXGroup;
+			children = (
+				94112D192ABEEBB0008750E2 /* tgaimage.cpp */,
+				94112D182ABEEBB0008750E2 /* tgaimage.h */,
+			);
+			name = Reference;
+			sourceTree = "<group>";
+		};
+		9475AFEF2AC5A27700ED0223 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				9475AFE82AC527E900ED0223 /* vec.h */,
+				9475AFED2AC591BD00ED0223 /* vec.cpp */,
+				9475AFF32AC5A2F200ED0223 /* model.h */,
+				9475AFF42AC5A2F200ED0223 /* model.cpp */,
+			);
+			path = Library;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -141,9 +160,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9475AFEE2AC591BD00ED0223 /* vec.cpp in Sources */,
 				94112D1A2ABEEBB0008750E2 /* tgaimage.cpp in Sources */,
 				94112D122ABEE8EC008750E2 /* main.cpp in Sources */,
-				94112D1E2ABEF0F9008750E2 /* model.cpp in Sources */,
+				9475AFF52AC5A2F200ED0223 /* model.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

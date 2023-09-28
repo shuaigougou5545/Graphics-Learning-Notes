@@ -162,7 +162,7 @@ void line(int x0, int y0, int x1, int y1, TGAImage& image, TGAColor color)
 
 任何多边形可以被拆分为多个三角形（硬件可以为我们轻松做到），这里就不仔细研究了，这里我们研究三角形的光栅化。三角形的光栅化沿用上面的画线算法，在三角形内填充像素
 
-如何进行光栅化，一般进行水平扫描（迭代y）【为了防止三角形边畸形，建议还是和画线算法一样判断xy的跨度，选择跨度大的方向进行迭代】，所以我们得知道左右边界 => 我们可以把点按照y的大小排成p0、p1、p2，那么p0～p2就是左边轮廓，p0～p1、p1～p2就是右轮廓，但是现在右轮廓是两段线段，影响代码的优美性，我们可以将三角形从中间劈开，劈成两个三角形，然后分别绘制上下三角形
+**光栅化方法1**：（延用画线算法）一般进行水平扫描（迭代y）【为了防止三角形边畸形，建议还是和画线算法一样判断xy的跨度，选择跨度大的方向进行迭代】，所以我们得知道左右边界 => 我们可以把点按照y的大小排成p0、p1、p2，那么p0～p2就是左边轮廓，p0～p1、p1～p2就是右轮廓，但是现在右轮廓是两段线段，影响代码的优美性，我们可以将三角形从中间劈开，劈成两个三角形，然后分别绘制上下三角形
 
 ```cpp
 // version 1
@@ -189,7 +189,56 @@ void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
 
 这里可以优化的点：（1）舍弃浮点数，用整数表达（2）x、y方向应该根据跨度进行修改
 
+**光栅化方法2**：找到三角形的bounding box(x/y的最大最小值)，对bounding box中每个像素进行判断是否在三角形内，以进行着色 => 这种方法看似麻烦，但它的计算具有一定的并行性，符合GPU计算的特性
 
+```cpp
+triangle(vec2 points[3]) { 
+    vec2 bbox[2] = find_bounding_box(points); 
+    for (each pixel in the bounding box) { 
+        if (inside(points, pixel)) { 
+            put_pixel(pixel); 
+        } 
+    } 
+}
+```
 
+重心坐标：
+$$
+\triangle ABC,点P
+\\ \vec{AP}=u\vec{AB}+v\vec{AC}
+\\ \left\{\begin{matrix} 
+u\vec{AB}.x+v\vec{AC}.x+\vec{PA}.x=0
+\\ u\vec{AB}.y+v\vec{AC}.y+\vec{PA}.y=0
+\end{matrix}\right.
+$$
+这是一个二元一次方程组的求解问题，方法有：
 
+- 方法1：【带入消元法】
+- 方法2：【叉乘法】对应相乘其实我们可以写成点乘（或者矩阵相乘）的形式，点乘为0，意味着两个向量正交，那么向量a=(u,v,1)与向量b=(AB.x, AC.x, PA.x)、向量c=(AB.y, AC.y, PA.y)分别正交，那相当于a与cross(b, c)共线
+  - 当b与c共线/平行，叉乘为0向量，意味着无解，同时b、c叉乘也失去了几何意义（垂直于平面的向量）=> bc共线意味着k_AB = k_AC = k_PA，那就是三角形不存在，或者说ABC三点共线
+
+最后还原成重心方程：
+$$
+\\ u\vec{AB}+v\vec{AC}+\vec{PA}=0
+\\ u(\vec{PB}-\vec{PA})+v(\vec{PC}-\vec{PA})+\vec{PA}=0
+\\ (1-u-v)\vec{PA}+u\vec{PB}+v\vec{PC}=0
+$$
+
+```cpp
+vec3 barycentric(const array<vec2i, 3>& pts, const vec2i& P)
+{
+    vec3i a = {pts[1].x - pts[0].x, pts[2].x - pts[0].x, pts[0].x - P.x};
+    vec3i b = {pts[1].y - pts[0].y, pts[2].y - pts[0].y, pts[0].y - P.y};
+    
+    vec3i u = a.cross(b);
+    
+    if (std::abs(u.z) < 1) // 因为后续要除以z,这里要事先剔除
+        return vec3(-1, 1, 1);
+    
+    return vec3(1.f - (u.x + u.y) / (float)u.z, u.x / (float)u.z, u.y / (float)u.z);
+}
+/*
+abs(u.z) < 1的意思是u.z=0,u.z存储的是AB×AC的结果,叉乘为0代表AB、AC共线，三角形坍缩成直线
+*/
+```
 

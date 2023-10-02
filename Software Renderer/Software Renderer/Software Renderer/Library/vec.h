@@ -95,7 +95,15 @@ public:
     }
     
     float dot(const vec3& v) const { return x * v.x + y * v.y + z * v.z; }
-    vec3 cross(const vec3& v) const { return vec3(y * v.z - z * v.y, z * v.x - x * v.y, x * v.y - y * v.x); }
+    vec3 cross(const vec3& v) const { return vec3(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x); }
+    vec3 normalize()
+    {
+        float div = sqrt(x * x + y * y + z * z);
+        x /= div;
+        y /= div;
+        z /= div;
+        return *this;
+    }
     
     float x, y, z;
 };
@@ -126,7 +134,7 @@ public:
     }
     
     int dot(const vec3i& v) const { return x * v.x + y * v.y + z * v.z; }
-    vec3i cross(const vec3i& v) const { return vec3i(y * v.z - z * v.y, z * v.x - x * v.y, x * v.y - y * v.x); }
+    vec3i cross(const vec3i& v) const { return vec3i(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x); }
     
     int x, y, z;
 };

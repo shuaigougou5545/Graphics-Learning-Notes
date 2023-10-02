@@ -242,3 +242,72 @@ abs(u.z) < 1的意思是u.z=0,u.z存储的是AB×AC的结果,叉乘为0代表AB�
 */
 ```
 
+使用重心坐标进行光栅化：
+
+```cpp
+// version 2
+void triangle(const array<vec2i, 3>& pts, TGAImage &image, TGAColor color)
+{
+    vec2i bboxmin(image.get_width() - 1,  image.get_height() - 1);
+    vec2i bboxmax(0, 0);
+    vec2i clamp(image.get_width() - 1, image.get_height() - 1);
+    for (int i = 0; i < 3; i++)
+    {
+        bboxmin.x = std::max(0, std::min(bboxmin.x, pts[i].x));
+        bboxmin.y = std::max(0, std::min(bboxmin.y, pts[i].y));
+        bboxmax.x = std::min(clamp.x, std::max(bboxmax.x, pts[i].x));
+        bboxmax.y = std::min(clamp.y, std::max(bboxmax.y, pts[i].y));
+    }
+    vec2i P;
+    for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++)
+    {
+        for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++)
+        {
+            vec3 bc_screen = barycentric(pts, P);
+            if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0)
+                continue;
+            image.set(P.x, P.y, color);
+        }
+    }
+}
+```
+
+##### 背面剔除
+
+----
+
+#### 渲染管线
+
+###### 💡要想写好软光栅，必须深入了解渲染管线每个具体环节～
+
+> 图形学01-渲染管线概述 - Autumns-AA的文章 - 知乎 https://zhuanlan.zhihu.com/p/593640899
+
+1. CPU端
+
+   1. 数据加载进显存，设置渲染状态，调用draw call
+   2. **视锥体剔除**：根据摄像机参数，对模型和视锥体进行碰撞检测，剔除掉不在视锥体内的 => 常见手法：通过AABB描述模型
+   3. 确定物体渲染顺序
+   4. 打包数据，比如模型数据、相关Uniform参数等
+
+2. GPU端
+
+   1. 顶点着色器（VS）
+
+   2. 曲面细分着色器
+
+   3. 几何着色器（GS）
+
+   4. **裁剪（Clipping）**：删除不在摄像机区域里的顶点和面片，可配置的阶段，是在齐次裁剪空间中进行
+
+      - > 参考文章：https://zhuanlan.zhihu.com/p/162190576
+
+   5. 屏幕映射
+
+   6. 光栅化阶段
+
+      1. 三角形设置
+      2. 三角形遍历
+
+   7. 片元着色器（PS）
+
+   8. 逐片元操作

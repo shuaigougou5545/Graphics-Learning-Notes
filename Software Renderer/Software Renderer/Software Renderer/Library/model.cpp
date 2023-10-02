@@ -4,13 +4,14 @@
 #include <sstream>
 
 
-model::model(const char *filename) : verts(), faces()
+Model::Model(const char *filename) : verts(), faces()
 {
     std::ifstream in;
     in.open(filename, std::ifstream::in);
     if(in.fail()) return;
     std::string line;
-    while (!in.eof()) {
+    while (!in.eof())
+    {
         std::getline(in, line);
         std::istringstream iss(line.c_str());
         char trash;
@@ -18,7 +19,7 @@ model::model(const char *filename) : verts(), faces()
         {
             iss >> trash;
             vec3 v;
-            for (int i = 0; i < 3; i++)
+            for(int i = 0; i < 3; i++)
                 iss >> v[i];
             verts.push_back(v);
         }else if (!line.compare(0, 2, "f "))
@@ -28,7 +29,7 @@ model::model(const char *filename) : verts(), faces()
             iss >> trash;
             while (iss >> idx >> trash >> itrash >> trash >> itrash)
             {
-                idx--;
+                idx--; // obj索引以1开始
                 f.push_back(idx);
             }
             faces.push_back(f);
@@ -37,7 +38,7 @@ model::model(const char *filename) : verts(), faces()
     std::cerr << "# v# " << verts.size() << " f# "  << faces.size() << std::endl;
 }
 
-model::~model()
+Model::~Model()
 {
       
 }

@@ -4,10 +4,10 @@
 #include <vector>
 #include "vec.h"
 
-class model{
+class Model{
 public:
-    model(const char *filename);
-    ~model();
+    Model(const char *filename);
+    ~Model();
     std::vector<vec3> verts;
     std::vector<std::vector<int>> faces;
 };

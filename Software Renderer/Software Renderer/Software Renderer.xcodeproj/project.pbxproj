@@ -9,7 +9,8 @@
 /* Begin PBXBuildFile section */
 		94112D122ABEE8EC008750E2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94112D112ABEE8EC008750E2 /* main.cpp */; };
 		94112D1A2ABEEBB0008750E2 /* tgaimage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94112D192ABEEBB0008750E2 /* tgaimage.cpp */; };
-		9475AFEE2AC591BD00ED0223 /* vec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9475AFED2AC591BD00ED0223 /* vec.cpp */; };
+		9429FF6E2ACBC3B000C79869 /* geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9429FF6D2ACBC3B000C79869 /* geometry.cpp */; };
+		9475AFEE2AC591BD00ED0223 /* math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9475AFED2AC591BD00ED0223 /* math.cpp */; };
 		9475AFF52AC5A2F200ED0223 /* model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9475AFF42AC5A2F200ED0223 /* model.cpp */; };
 /* End PBXBuildFile section */
 
@@ -31,8 +32,10 @@
 		94112D182ABEEBB0008750E2 /* tgaimage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tgaimage.h; sourceTree = "<group>"; };
 		94112D192ABEEBB0008750E2 /* tgaimage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tgaimage.cpp; sourceTree = "<group>"; };
 		94112D222ABEF465008750E2 /* african_head.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = african_head.obj; sourceTree = "<group>"; };
-		9475AFE82AC527E900ED0223 /* vec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vec.h; sourceTree = "<group>"; };
-		9475AFED2AC591BD00ED0223 /* vec.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = vec.cpp; sourceTree = "<group>"; };
+		9429FF6C2ACBC3B000C79869 /* geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
+		9429FF6D2ACBC3B000C79869 /* geometry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = geometry.cpp; sourceTree = "<group>"; };
+		9475AFE82AC527E900ED0223 /* math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = math.h; sourceTree = "<group>"; };
+		9475AFED2AC591BD00ED0223 /* math.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = math.cpp; sourceTree = "<group>"; };
 		9475AFF32AC5A2F200ED0223 /* model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = model.h; sourceTree = "<group>"; };
 		9475AFF42AC5A2F200ED0223 /* model.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = model.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -95,10 +98,12 @@
 		9475AFEF2AC5A27700ED0223 /* Library */ = {
 			isa = PBXGroup;
 			children = (
-				9475AFE82AC527E900ED0223 /* vec.h */,
-				9475AFED2AC591BD00ED0223 /* vec.cpp */,
+				9475AFE82AC527E900ED0223 /* math.h */,
+				9475AFED2AC591BD00ED0223 /* math.cpp */,
 				9475AFF32AC5A2F200ED0223 /* model.h */,
 				9475AFF42AC5A2F200ED0223 /* model.cpp */,
+				9429FF6C2ACBC3B000C79869 /* geometry.h */,
+				9429FF6D2ACBC3B000C79869 /* geometry.cpp */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -160,9 +165,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9475AFEE2AC591BD00ED0223 /* vec.cpp in Sources */,
+				9475AFEE2AC591BD00ED0223 /* math.cpp in Sources */,
 				94112D1A2ABEEBB0008750E2 /* tgaimage.cpp in Sources */,
 				94112D122ABEE8EC008750E2 /* main.cpp in Sources */,
+				9429FF6E2ACBC3B000C79869 /* geometry.cpp in Sources */,
 				9475AFF52AC5A2F200ED0223 /* model.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

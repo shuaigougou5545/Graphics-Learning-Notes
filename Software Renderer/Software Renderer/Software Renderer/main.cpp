@@ -5,7 +5,8 @@
 #include <string>
 #include "tgaimage.h"
 #include "model.h"
-#include "vec.h"
+#include "math.h"
+#include "geometry.h"
 
 using namespace std;
 
@@ -59,40 +60,27 @@ void line(const vec2i& p0, const vec2i& p1, TGAImage& image, TGAColor color)
     }
 }
 
-vec3 barycentric(const array<vec2i, 3>& pts, const vec2i& P)
+void triangle(const array<vec2, 3>& pts, vector<vector<float>>& zbuffer, TGAImage &image, TGAColor color)
 {
-    // AB AC PA
-    vec3i a = {pts[1].x - pts[0].x, pts[2].x - pts[0].x, pts[0].x - P.x};
-    vec3i b = {pts[1].y - pts[0].y, pts[2].y - pts[0].y, pts[0].y - P.y};
-    
-    vec3i u = a.cross(b);
-    
-    if (std::abs(u.z) < 1)
-        return vec3(-1, 1, 1);
-    
-    return vec3(1.f - (u.x + u.y) / (float)u.z, u.x / (float)u.z, u.y / (float)u.z);
-}
-
-void triangle(const array<vec2i, 3>& pts, TGAImage &image, TGAColor color)
-{
-    vec2i bboxmin(image.get_width() - 1,  image.get_height() - 1);
-    vec2i bboxmax(0, 0);
-    vec2i clamp(image.get_width() - 1, image.get_height() - 1);
+    vec2 bboxmin(image.get_width() - 1.0,  image.get_height() - 1.0);
+    vec2 bboxmax(0.0, 0.0);
+    vec2 clamp(image.get_width() - 1.0, image.get_height() - 1.0);
     for (int i = 0; i < 3; i++)
     {
-        bboxmin.x = std::max(0, std::min(bboxmin.x, pts[i].x));
-        bboxmin.y = std::max(0, std::min(bboxmin.y, pts[i].y));
+        bboxmin.x = std::max(0.f, std::min(bboxmin.x, pts[i].x));
+        bboxmin.y = std::max(0.f, std::min(bboxmin.y, pts[i].y));
         bboxmax.x = std::min(clamp.x, std::max(bboxmax.x, pts[i].x));
         bboxmax.y = std::min(clamp.y, std::max(bboxmax.y, pts[i].y));
     }
-    vec2i P;
-    for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++)
+    vec2 P;
+    vec3 bary;
+    for(P.x = bboxmin.x; P.x <= bboxmax.x; P.x++)
     {
-        for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++)
+        for(P.y = bboxmin.y; P.y <= bboxmax.y; P.y++)
         {
-            vec3 bc_screen = barycentric(pts, P);
-            if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0)
+            if(!isPointInTriangle2D(P, pts, bary))
                 continue;
+            
             image.set(P.x, P.y, color);
         }
     }
@@ -102,21 +90,26 @@ void triangle(const array<vec2i, 3>& pts, TGAImage &image, TGAColor color)
 int main()
 {
     TGAImage image(width, height, TGAImage::RGB);
+    vector<vector<float>> zbuffer(width, vector<float>(height, 1.0));
     
-    for(int i = 0; i < model.faces.size(); i++)
-    {
-        std::vector<int> face = model.faces[i];
-        vec2i screen_coords[3];
-        for (int j = 0; j < 3; j++)
-        {
-            vec3 world_coords = model.verts[face[j]];
-            screen_coords[j].x = (world_coords.x + 1.0) * width / 2.0;
-            screen_coords[j].y = (world_coords.y + 1.0) * height / 2.0;
-        }
-        triangle({screen_coords[0], screen_coords[1], screen_coords[2]}, image, TGAColor(rand() % 255, rand() % 255, rand() % 255, 255));
-    }
+    triangle({{{100.0, 100.0}, {200.0, 100.0}, {200.0, 200.0}}}, zbuffer, image, TGAColor(rand()%255, rand()%255, rand()%255, 255));
     
+//    for(int i = 0; i < model.faces.size(); i++)
+//    {
+//        std::vector<int> face = model.faces[i];
+//        vec2i screen_coords[3];
+//        vec3 world_coords[3];
+//        for (int j = 0; j < 3; j++)
+//        {
+//            world_coords[j] = model.verts[face[j]];
+//            screen_coords[j].x = (world_coords[j].x + 1.0) * width / 2.0;
+//            screen_coords[j].y = (world_coords[j].y + 1.0) * height / 2.0;
+//        }
+//
+//        triangle({screen_coords[0], screen_coords[1], screen_coords[2]}, zbuffer, image, TGAColor(rand()%255, rand()%255, rand()%255, 255));
+//    }
     
+
     image.flip_vertically();
     image.write_tga_file(file_name);
     

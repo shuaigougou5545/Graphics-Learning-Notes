@@ -1,13 +1,20 @@
-#ifndef vec_h
-#define vec_h
+#ifndef math_h
+#define math_h
 
 #include <iostream>
+#include <vector>
+#include <array>
+
 
 class vec2;
 class vec2i;
 class vec3;
 class vec3i;
 class vec4;
+
+class mat2;
+class mat3;
+class mat4;
 
 
 class vec2{
@@ -104,6 +111,8 @@ public:
         z /= div;
         return *this;
     }
+    float norm() const { return sqrt(x * x + y * y + z * z); }
+    
     
     float x, y, z;
 };
@@ -171,4 +180,156 @@ public:
     float x, y, z, w;
 };
 
-#endif /* vec_h */
+
+class mat2{
+public:
+    mat2()
+    {
+        *this = identity();
+    }
+    
+    mat2(const vec2& v0, const vec2& v1)
+    {
+        cols = {v0, v1};
+    }
+    
+    mat2(float x0, float y0,
+         float x1, float y1)
+    {
+        cols = {{{x0, x1}, {y0, y1}}};
+    }
+
+    mat2 identity() const
+    {
+        return mat2(1.0, 0.0,
+                    0.0, 1.0);
+    }
+
+    mat2 zero() const
+    {
+        return mat2(0.0, 0.0,
+                    0.0, 0.0);
+    }
+
+    vec2& operator[](int row)
+    {
+        return cols[row];
+    }
+    
+    float determinant()
+    {
+        return cols[0][0] * cols[1][1] - cols[0][1] * cols[1][0];
+    }
+    
+    std::array<vec2, 2> cols;
+};
+
+
+class mat3{
+public:
+    mat3()
+    {
+        *this = identity();
+    }
+    
+    mat3(const vec3& v0, const vec3& v1, const vec3& v2)
+    {
+        cols = {v0, v1, v2};
+    }
+    
+    mat3(float x0, float y0, float z0,
+         float x1, float y1, float z1,
+         float x2, float y2, float z2)
+    {
+        cols = {{{x0, x1, x2}, {y0, y1, y2}, {z0, z1, z2}}};
+    }
+
+    mat3 identity() const
+    {
+        return mat3(1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0);
+    }
+
+    mat3 zero() const
+    {
+        return mat3(0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+    }
+
+    vec3& operator[](int row)
+    {
+        return cols[row];
+    }
+    
+    float determinant()
+    {
+        return cols[0][0] * (cols[1][1] * cols[2][2] - cols[2][1] * cols[1][2])
+            - cols[1][0] * (cols[0][1] * cols[2][2] - cols[2][1] * cols[0][2])
+            + cols[2][0] * (cols[0][1] * cols[1][2] - cols[1][1] * cols[0][2]);
+    }
+    
+    mat3& setCol(int col, const vec3& v)
+    {
+        cols[col] = v;
+        return *this;
+    }
+    
+    mat3& setRow(int row, const vec3& v)
+    {
+        cols[0][row] = v.x;
+        cols[1][row] = v.y;
+        cols[2][row] = v.z;
+        return *this;
+    }
+    
+    std::array<vec3, 3> cols;
+};
+
+
+class mat4{
+public:
+    mat4()
+    {
+        *this = identity();
+    }
+    
+    mat4(const vec4& v0, const vec4& v1, const vec4& v2, const vec4& v3)
+    {
+        cols = {v0, v1, v2, v3};
+    }
+    
+    mat4(float x0, float y0, float z0, float w0,
+         float x1, float y1, float z1, float w1,
+         float x2, float y2, float z2, float w2,
+         float x3, float y3, float z3, float w3)
+    {
+        cols = {{{x0, x1, x2, x3}, {y0, y1, y2, y3}, {z0, z1, z2, z3}, {w0, w1, w2, w3}}};
+    }
+    
+    mat4 identity() const
+    {
+        return mat4(1.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0);
+    }
+    
+    mat4 zero() const
+    {
+        return mat4(0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0);
+    }
+    
+    vec4& operator[](int row)
+    {
+        return cols[row];
+    }
+    
+    std::array<vec4, 4> cols;
+};
+
+#endif /* math_h */

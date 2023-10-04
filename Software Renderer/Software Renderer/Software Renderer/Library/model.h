@@ -2,7 +2,7 @@
 #define model_h
 
 #include <vector>
-#include "vec.h"
+#include "math.h"
 
 class Model{
 public:

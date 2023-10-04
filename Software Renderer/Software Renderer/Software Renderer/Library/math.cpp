@@ -1,4 +1,4 @@
-#include "vec.h"
+#include "math.h"
 
 
 vec2::vec2(const vec2i& v)

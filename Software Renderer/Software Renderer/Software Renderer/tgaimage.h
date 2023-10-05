@@ -93,4 +93,5 @@ public:
 	void clear();
 };
 
+
 #endif //__IMAGE_H__

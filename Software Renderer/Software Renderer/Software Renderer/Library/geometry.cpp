@@ -28,6 +28,38 @@ bool isPointInTriangle2D(const vec2& p, const std::array<vec2, 3>& pts, vec3& ba
     return true;
 }
 
+bool isPointInTriangle2D_CramersRule(const vec2& p, const std::array<vec2, 3>& pts, vec3& bary)
+{
+    // use 'Cramer's Rule' to calculate barycentric coordinates
+    float epsilon = 0.0001;
+    bary = {-1.0, 1.0, 1.0};
+    
+    vec2 a = pts[0];
+    vec2 b = pts[1];
+    vec2 c = pts[2];
+    
+    vec2 ab = b - a;
+    vec2 ac = c - a;
+    vec2 ap = p - a;
+    
+    mat2 coords_matrix = { ab.x, ab.y, ac.x, ac.y };
+    
+    float D = coords_matrix.determinant();
+    if(abs(D) < epsilon)
+        return false;
+    
+    bary.y = mat2(ap.x, ap.y, ac.x, ac.y).determinant() / D;
+    bary.z = mat2(ab.x, ab.y, ap.x, ap.y).determinant() / D;
+    bary.x = 1.0 - (bary.y + bary.z);
+    
+    if(bary.x < 0 ||
+       bary.y < 0 ||
+       bary.z < 0 ||
+       std::abs(bary.x + bary.y + bary.z - 1.f) > epsilon)
+        return false;
+    return true;
+}
+
 bool isPointInTriangle3D(const vec3& p, const std::array<vec3, 3>& pts, vec3& bary)
 {
     // use 'subtriangle area' to calculate barycentric coordinates
@@ -69,3 +101,5 @@ bool isPointInTriangle3D(const vec3& p, const std::array<vec3, 3>& pts, vec3& ba
         return false;
     return true;
 }
+
+

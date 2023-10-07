@@ -41,40 +41,6 @@ void draw_line(const vec2i& p0, const vec2i& p1, TGAImage& image, TGAColor color
     }
 }
 
-void draw_triangle(const std::array<vec3, 3>& pts, std::vector<std::vector<float>>& zbuffer, TGAImage &image, TGAColor color)
-{
-    vec2 bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-    vec2 bboxmax(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-    vec2 clamp(image.get_width() - 1.0, image.get_height() - 1.0);
-    for (int i = 0; i < 3; i++)
-    {
-        bboxmin.x = std::max(0.f, std::min(bboxmin.x, pts[i].x));
-        bboxmin.y = std::max(0.f, std::min(bboxmin.y, pts[i].y));
-        bboxmax.x = std::min(clamp.x, std::max(bboxmax.x, pts[i].x));
-        bboxmax.y = std::min(clamp.y, std::max(bboxmax.y, pts[i].y));
-    }
-    vec3 P;
-    vec3 bary;
-    for(P.x = bboxmin.x; P.x <= bboxmax.x; P.x++)
-    {
-        for(P.y = bboxmin.y; P.y <= bboxmax.y; P.y++)
-        {
-            if(!is_point_in_triangle_2d({P.x, P.y}, {{{pts[0].x, pts[0].y},{pts[1].x, pts[1].y},{pts[2].x, pts[2].y}}}, bary))
-                continue;
-            
-            P.z = 0.0;
-            for(int i = 0; i < 3; i++)
-                P.z += pts[i].z * bary[i];
-            
-            if(zbuffer[int(P.y)][int(P.x)] < P.z)
-            {
-                zbuffer[int(P.y)][int(P.x)] = P.z;
-                image.set(P.x, P.y, color);
-            }
-        }
-    }
-}
-
 bool is_point_in_triangle_2d(const vec2& p, const std::array<vec2, 3>& pts, vec3& bary)
 {
     // use 'cross product' to calculate barycentric coordinates
@@ -177,3 +143,20 @@ bool is_point_in_triangle_3d(const vec3& p, const std::array<vec3, 3>& pts, vec3
 }
 
 
+vec3 barycentric(const vec2& A, const vec2& B, const vec2& C, const vec2& P)
+{
+    // AB AC PA
+    vec2 AB = B - A;
+    vec2 AC = C - A;
+    vec2 PA = A - P;
+    
+    vec3 u = vec3(AB.x, AC.x, PA.x).cross(vec3(AB.y, AC.y, PA.y));
+    if(std::abs(u.z) < 1e-2)
+        return vec3(-1.f, 1.f, 1.f);
+    
+    vec3 bary;
+    bary.y = u.x / u.z;
+    bary.z = u.y / u.z;
+    bary.x = 1.f - (bary.y + bary.z);
+    return bary;
+}

@@ -12,8 +12,9 @@
 using namespace std;
 
 
-const char* file_name = "output.tga";
-Model model = Model("./obj/african_head.obj");
+const char* filename_output = "output.tga";
+const char* filename_zbuffer = "zbuffer.tga";
+Model model("./obj/african_head.obj");
 const int width  = 800;
 const int height = 800;
 
@@ -29,49 +30,54 @@ vec3 center = {0,0,0};
 vec3 up = {0,1,0};
 
 
-//struct FirstShader : public Shader {
-//    vec3 varying_intensity;
-//
-//    virtual vec4 vertex();
-//};
+class BlinnPhongShader : public Shader {
+public:
+    vec3 varying_intensity;
 
+    virtual vec4 vertex(int face_id, int vert_id)
+    {
+        varying_intensity[vert_id] = model.normal(face_id, vert_id).max(vec3(0.f)).dot(light_dir);
+        vec4 gl_Vertex = model.verts[vert_id];
+        
+        auto dc = viewport_matrix * projection_matrix * view_matrix * model_matrix * gl_Vertex;
+        return dc;
+    }
+
+    virtual bool fragment(vec3 bary, TGAColor &color)
+    {
+        float intensity = varying_intensity.dot(bary);
+        color = TGAColor(255, 255, 255) * intensity;
+        return true;
+    }
+};
 
 
 int main()
 {
     TGAImage image(width, height, TGAImage::RGB);
-    vector<vector<float>> zbuffer(height, vector<float>(width, numeric_limits<float>::min()));
+    TGAImage zbuffer(width, height, TGAImage::GRAYSCALE);
     
-    vec3 light_dir = {0.0, 0.0, -1.0};
-    for(int i = 0; i < model.facet_vrt.size()/3; i++)
-    {
-        vec3 screen_coords[3];
-        vec3 world_coords[3];
-        vec3 normals[3];
-        vec2 uv[3];
-        for (int j = 0; j < 3; j++)
-        {
-            int vertex_idx = model.facet_vrt[3 * i + j];
-            world_coords[j] = model.verts[vertex_idx];
-            screen_coords[j].x = round((world_coords[j].x + 1.0) * width / 2.0);
-            screen_coords[j].y = round((world_coords[j].y + 1.0) * height / 2.0);
-            screen_coords[j].z = world_coords[j].z;
-            
-            int normal_idx = model.facet_nrm[3 * i + j];
-            normals[j] = model.norms[normal_idx];
-            
-            int uv_idx = model.facet_tex[3 * i + j];
-            uv[j] = model.tex_coords[uv_idx];
-        }
-        
-        vec3 n = ((normals[0] + normals[1] + normals[2]) / 3.0 + 1.0) / 2.0;
-        draw_triangle({screen_coords[0], screen_coords[1], screen_coords[2]}, zbuffer, image, TGAColor(n.x*255, n.y*255, n.z*255, 255));
-    }
+    BlinnPhongShader shader;
+    
+//    for(int i = 0; i < model.nfaces(); i++)
+//    {
+//        std::vector<vec4> screen_coords;
+//        screen_coords.resize(3);
+//        for(int j = 0; j < 3; j++)
+//        {
+//            screen_coords[j] = shader.vertex(i, j);
+//        }
+//        triangle(screen_coords, shader, image, zbuffer);
+//    }
+    
+    triangle({{0.0, 0.0, 1.0, 1.0}, {1.0, 0.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}}, shader, image, zbuffer);
     
 
     image.flip_vertically();
-    image.write_tga_file(file_name);
+    zbuffer.flip_vertically();
+    image.write_tga_file(filename_output);
+    zbuffer.write_tga_file(filename_zbuffer);
     
-    std::string command = "open " + string(file_name);
+    std::string command = "open " + string(filename_output);
     system(command.c_str());
 }

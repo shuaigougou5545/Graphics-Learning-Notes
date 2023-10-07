@@ -80,3 +80,19 @@ void Model::load_texture(std::string filename, const std::string suffix, TGAImag
     std::string texfile = filename.substr(0, dot) + suffix;
     std::cerr << "texture file " << texfile << " loading " << (img.read_tga_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
 }
+
+vec2 Model::uv(int face_id, int vert_id)
+{
+    return tex_coords[facet_tex[face_id * 3 + vert_id]];
+}
+
+vec3 Model::normal(const vec2& uv)
+{
+    TGAColor c = normal_map.get(uv.x * normal_map.get_width(), uv.y * normal_map.get_height());
+    return vec3(float(c[2]), float(c[1]), float(c[0])) * 2.f / 255.f - vec3(1.f);
+}
+
+vec3 Model::normal(int face_id, int vert_id)
+{
+    return norms[facet_nrm[face_id * 3 + vert_id]];
+}

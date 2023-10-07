@@ -23,6 +23,12 @@ public:
     TGAImage specular_map;
     
     void load_texture(std::string filename, const std::string suffix, TGAImage &img);
+    
+    size_t nfaces() { return verts.size(); }
+    
+    vec2 uv(int face_id, int vert_id);
+    vec3 normal(const vec2& uv);
+    vec3 normal(int face_id, int vert_id);
 };
 
 #endif /* model_h */

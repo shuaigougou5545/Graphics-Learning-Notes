@@ -379,6 +379,69 @@ PS：行列式为0，并不代表方程一定无解 => 方程可能有无穷解�
 
 z-buffer是二维的数组，存储最小的z值，渲染时如果当前z值小于存储的z，就覆写z-buffer和屏幕颜色缓冲
 
+#### 4.shader
+
+**视口变换（viewport）**
+
+```cpp
+mat4 viewport(int x, int y, int w, int h);
+```
+
+x、y、w、h分别代表屏幕上展示的范围，视口变换就是将NDC空间映射到屏幕空间上，[-1,1\]=>[x,x+w]、[-1,1]=>[y,y+h]、[-1,1] => [min_depth,max_depth]（一般设置为0～1或-1～1）
+
+⚠️这里注意：不同api对y的起始大小规定不同，所以可能需要在viewport矩阵上对y进行翻转；另外对于ndc空间的定义也是不同的（影响z分量）【**这里以OpenGL为例**】
+$$
+\begin{bmatrix}
+ w/2 & 0 & 0 & x+w/2\\
+ 0 & h/2 & 0 & y+w/2\\
+ 0 & 0 & (max\_depth-min\_depth)/2 & (max\_depth+min\_depth)/2\\
+ 0 & 0 & 0 &1
+\end{bmatrix}
+$$
+
+##### 投影（projection）
+
+【**以OpenGL为例**】n的范围是-1～1
+$$
+M_{projection}=\begin{pmatrix}
+ \frac{1}{r\cdot tan\frac{\alpha}{2}} & 0 & 0 & 0\\
+ 0 & \frac{1}{tan\frac{\alpha}{2}} & 0 & 0\\
+ 0 & 0 & \frac{f+n}{f-n} & 1 \\
+ 0 & 0 & \frac{-2nf}{f-n} & 0
+\end{pmatrix}
+$$
+
+##### 摄像机空间（view）/ LookAt矩阵
+
+view矩阵本身只包括旋转和平移，又因为world=>view需要求逆操作，所以我们分别对旋转和平移矩阵求逆，再将两个变化矩阵合并起来
+$$
+V=(RT)^{-1}=T^{-1}R^{-1}
+$$
+
+$$
+M_{view} =\begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+-T_x & -T_y & -T_z & 1
+\end{bmatrix}
+\begin{bmatrix}
+u_x & v_x & w_x & 0 \\
+u_y & v_y & w_y & 0 \\
+u_z & v_z & w_z & 0 \\
+0 & 0 & 0 & 1
+\end{bmatrix}
+
+{\color{green} 
+= \begin{bmatrix}
+u_x & v_x & w_x & 0 \\
+u_y & v_y & w_y & 0 \\
+u_z & v_z & w_z & 0 \\
+-u\cdot T & -v\cdot T & -w \cdot T & 1
+\end{bmatrix}
+}
+$$
+
 
 
 ----
@@ -418,3 +481,33 @@ z-buffer是二维的数组，存储最小的z值，渲染时如果当前z值小�
    7. 片元着色器（PS）
 
    8. 逐片元操作
+
+-----
+
+##### 透视矫正
+
+> 参考论文：https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
+
+进行透视投影时，影响了三个点之间的位置关系，导致插值错误，产生透视扭曲
+
+【例】：三个点在世界空间中可能C并不是AB的中点，但是经过投影后（vertex shader）在齐次裁剪空间/NDC空间站中，C成为了AB的中点，如下图👇
+
+<img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202310071202225.webp" alt="1293315-6768532ee7852e8e" style="zoom:50%;" />
+
+如果用插值的uv来采样纹理，可能导致纹理扭曲 =》 **结论：直接在屏幕空间中对属性做<u>线性插值</u>可能存在透视扭曲的现象**
+
+<img src="https://cdn.jsdelivr.net/gh/shuaigougou5545/blog-image/img/202310071204890.webp" alt="1293315-2e28bf5b6dd4a7f1" style="zoom:50%;" />
+
+透视扭曲发生的根本原因是：透视投影矩阵对z的变换不是线性的
+
+根据推导我们知道：
+$$
+\frac{I_t}{Z_t}=\frac{I_1}{Z_1}+s(\frac{I_2}{Z_2}-\frac{I_1}{Z_1})
+$$
+透视校正插值：使用线性的深度值和非线性空间下的插值系数s来计算出线性空间下的插值系数t，通过真正的t来进行插值
+
+**那么硬件实际是怎么悄无声息地为我们进行透视校正的？** 
+
+- 在我们实现投影时，我们会将深度值保存在w分量中，这本身是为了进行透视除法。但是，当进行完透视除法后，这个分量并没有被丢弃，**而是保留下来进行后续的透视校正插值**
+- 插值发生在光栅化阶段，这个阶段，硬件利用我们之前保存的线性空间中z值，对各属性进行插值 => 也就是说，只有经过光栅化的属性才会被自动进行透视校正插值
+- 如果要在像素着色器中手动计算插值系数，就会出现问题 => 手动计算，需要手动进行透视校正

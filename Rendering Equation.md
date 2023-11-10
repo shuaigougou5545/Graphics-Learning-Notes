@@ -236,6 +236,8 @@ shadow_map是一个（点）光源，来判断每个物体是否能被照射，�
 
 #### （1）SSAO - 屏幕空间环境光遮蔽
 
+略～后续补充
+
 ### 6.环境光照
 
 #### （1）IBL
@@ -260,8 +262,6 @@ $$
 $$
 L_o(p,\omega_o)={\color{Red}\frac{\int_{\Omega_{f_r}}L_i(p,w_i)d\omega_i}{\int_{\Omega_{f_r}}d\omega_i}} \int_{H^2}f_r(p, w_i\rightarrow w_r)cos\theta_i d\omega_i
 $$
-
-
 
 **Split Sum 1st：**L拆出来：其实就是对某个范围采样L再进行平均，也就是**过滤/模糊**操作 => 我们可以提前将环境光图进行不同程度的模糊
 
